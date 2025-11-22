@@ -17,7 +17,6 @@ pipeline {
                     sh '''
                         echo "🚀 Deploying Production..."
 
-                        --
                         cd /var/www/api.gpsites.io
                         git config --global --add safe.directory /var/www/api.gpsites.io
                         git checkout main
