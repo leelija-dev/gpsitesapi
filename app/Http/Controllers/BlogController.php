@@ -29,6 +29,57 @@ class BlogController extends Controller
     return response()->json($blog);
   }
 
+  public function searchBlogs(Request $request)
+  {
+    // print_r($request);  die;
+    $query = BlogMst::query();
+    $query->where('is_approved', 'yes');
+    if ($request->filled('q')) {
+      $q = trim($request->get('q'));
+      $query->where(function ($sub) use ($q) {
+        $sub->where('website_name', 'LIKE', "%{$q}%")
+            ->orWhere('site_url', 'LIKE', "%{$q}%")
+            ->orWhere('website_niche', 'LIKE', "%{$q}%");
+      });
+    }
+    if ($request->filled('niche')) {
+      $raw = $request->get('niche');
+      $niches = is_array($raw) ? $raw : explode(',', (string)$raw);
+      $niches = array_values(array_filter(array_map('trim', $niches), fn($v) => $v !== ''));
+      if (!empty($niches)) {
+        $query->where(function ($sub) use ($niches) {
+          foreach ($niches as $n) {
+            $sub->orWhere('website_niche', 'LIKE', "%{$n}%");
+          }
+        });
+      }
+    }
+    if ($request->filled('da_min') && is_numeric($request->get('da_min'))) {
+      $query->where('moz_da', '>=', (float)$request->get('da_min'));
+    }
+    if ($request->filled('da_max') && is_numeric($request->get('da_max'))) {
+      $query->where('moz_da', '<=', (float)$request->get('da_max'));
+    }
+    if ($request->filled('dr_min') && is_numeric($request->get('dr_min'))) {
+      $query->where('ahrefs_dr', '>=', (float)$request->get('dr_min'));
+    }
+    if ($request->filled('dr_max') && is_numeric($request->get('dr_max'))) {
+      $query->where('ahrefs_dr', '<=', (float)$request->get('dr_max'));
+    }
+    $trafficSource = $request->get('traffic_source', 'ahrefs');
+    $trafficCol = $trafficSource === 'semrush' ? 'semrush_traffic' : 'ahrefs_traffic';
+    if ($request->filled('traffic_min') && is_numeric($request->get('traffic_min'))) {
+      $query->where($trafficCol, '>=', (float)$request->get('traffic_min'));
+    }
+    if ($request->filled('traffic_max') && is_numeric($request->get('traffic_max'))) {
+      $query->where($trafficCol, '<=', (float)$request->get('traffic_max'));
+    }
+    $perPage = (int)($request->get('per_page', 10));
+    $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 10;
+    $results = $query->paginate($perPage);
+    return response()->json($results);
+  }
+
 
   // public function addBlog(Request $request)
   // {

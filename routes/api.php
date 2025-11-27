@@ -9,6 +9,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/blogs', [BlogController::class, 'blogList']);
+Route::get('/blogs/search', [BlogController::class, 'searchBlogs']);
 // Route::get('/blogs/{$id}', [BlogController::class, 'getBlogById']);
-Route::get('/blogs/{id}', [BlogController::class, 'getBlogById']); // ✅ new route
+Route::get('/blogs/{id}', [BlogController::class, 'getBlogById']); // new route
 Route::post('/blog/add', [BlogController::class, 'addBlog']);
