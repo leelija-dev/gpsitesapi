@@ -11,7 +11,7 @@ class NicheController extends Controller
   //
   public function NicheList()
   {
-    return response()->json(NicheMaster::paginate(10));
+    return response()->json(NicheMaster::all());
   }
 
   
