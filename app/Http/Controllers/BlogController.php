@@ -9,10 +9,18 @@ use Illuminate\Support\Facades\Validator;
 class BlogController extends Controller
 {
   //
+  // public function blogList()
+  // {
+  //   return response()->json(BlogMst::paginate(10));
+  // }
+
   public function blogList()
   {
-    return response()->json(BlogMst::paginate(10));
+    return response()->json(
+      BlogMst::where('is_approved', 'yes')->paginate(10)
+    );
   }
+
 
   public function getBlogById($id)
   {
@@ -38,8 +46,8 @@ class BlogController extends Controller
       $q = trim($request->get('q'));
       $query->where(function ($sub) use ($q) {
         $sub->where('website_name', 'LIKE', "%{$q}%")
-            ->orWhere('site_url', 'LIKE', "%{$q}%")
-            ->orWhere('website_niche', 'LIKE', "%{$q}%");
+          ->orWhere('site_url', 'LIKE', "%{$q}%")
+          ->orWhere('website_niche', 'LIKE', "%{$q}%");
       });
     }
     if ($request->filled('niche')) {
