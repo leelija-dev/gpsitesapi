@@ -46,7 +46,10 @@ class BlogController extends Controller
       $raw = $request->get('niche');
       $niches = is_array($raw) ? $raw : explode(',', (string)$raw);
       $niches = array_values(array_filter(array_map('trim', $niches), fn($v) => $v !== ''));
-      if (!empty($niches)) {
+      // If 'all' is present (case-insensitive), skip niche filtering
+      $lower = array_map('strtolower', $niches);
+      $hasAll = in_array('all', $lower, true);
+      if (!$hasAll && !empty($niches)) {
         $query->where(function ($sub) use ($niches) {
           foreach ($niches as $n) {
             $sub->orWhere('website_niche', 'LIKE', "%{$n}%");
