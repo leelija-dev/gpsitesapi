@@ -14,13 +14,46 @@ class BlogController extends Controller
   //   return response()->json(BlogMst::paginate(10));
   // }
 
-  public function blogList()
-  {
-    return response()->json(
-      BlogMst::where('is_approved', 'yes')->paginate(10)
-    );
-  }
+  // public function blogList(Request $request)
+  // {
+  //   return response()->json(
+  //     BlogMst::where('is_approved', 'yes')->paginate(10)
+  //   );
+  // }
+public function blogList(Request $request)
+{
+    $query = BlogMst::where('is_approved', 'yes');
 
+    // Search by niche
+    if ($request->filled('website_niche')) {
+        $query->where('website_niche', 'LIKE', '%' . $request->website_niche . '%');
+    }
+
+    // Search by Moz DA (minimum and maximum)
+    if ($request->filled('da_min')) {
+        $query->where('moz_da', '>=', $request->da_min);
+    }
+
+    if ($request->filled('da_max')) {
+        $query->where('moz_da', '<=', $request->da_max);
+    }
+
+    // Search by Ahrefs DR (minimum and maximum)
+    if ($request->filled('dr_min')) {
+        $query->where('ahrefs_dr', '>=', $request->dr_min);
+    }
+
+    if ($request->filled('dr_max')) {
+        $query->where('ahrefs_dr', '<=', $request->dr_max);
+    }
+
+    // Search by Ahrefs traffic (minimum)
+    if ($request->filled('traffic_min')) {
+        $query->where('ahrefs_traffic', '<=', $request->traffic_min);
+    }
+
+    return response()->json($query->paginate(10));
+}
 
   public function getBlogById($id)
   {
