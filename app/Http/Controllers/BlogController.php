@@ -73,62 +73,202 @@ public function blogList(Request $request)
     return response()->json($blog);
   }
 
-  public function searchBlogs(Request $request)
-  {
-    // print_r($request);  die;
-    $query = BlogMst::query();
-    $query->where('is_approved', 'yes');
+//   public function searchBlogs(Request $request)
+//   {
+    
+//     $query = BlogMst::query();
+//     $query->where('is_approved', 'yes');
+//     if ($request->filled('q')) {
+//       $q = trim($request->get('q'));
+//       $query->where(function ($sub) use ($q) {
+//         $sub->where('website_name', 'LIKE', "%{$q}%")
+//           ->orWhere('site_url', 'LIKE', "%{$q}%")
+//           ->orWhere('website_niche', 'LIKE', "%{$q}%");
+//       });
+//     }
+//     if ($request->filled('niche')) {
+//       $raw = $request->get('niche');
+//       $niches = is_array($raw) ? $raw : explode(',', (string)$raw);
+//       $niches = array_values(array_filter(array_map('trim', $niches), fn($v) => $v !== ''));
+//       // If 'all' is present (case-insensitive), skip niche filtering
+//       $lower = array_map('strtolower', $niches);
+//       $hasAll = in_array('all', $lower, true);
+//       if (!$hasAll && !empty($niches)) {
+//         $query->where(function ($sub) use ($niches) {
+//           foreach ($niches as $n) {
+//             $sub->orWhere('website_niche', 'LIKE', "%{$n}%");
+//           }
+//         });
+//       }
+//     }
+//     if ($request->filled('da_min') ) {
+//       $query->where('moz_da', '>=', (float)$request->da_min);
+//     }
+//     if ($request->filled('da_max') ) {
+//       $query->where('moz_da', '<=', (float)$request->da_max);
+//     }
+//     if ($request->filled('dr_min') ) {
+//       $query->where('ahrefs_dr', '>=', (float)$request->dr_min);
+//     }
+//     if ($request->filled('dr_max') ) {
+//       $query->where('ahrefs_dr', '<=', (float)$request->dr_max);
+//     }
+//     // $trafficSource = $request->get('traffic_source', 'ahrefs');
+//     // // $trafficCol = $trafficSource === 'semrush' ? 'semrush_traffic' : 'ahrefs_traffic';
+//     // if ($request->filled('traffic_min') ) {
+//     //   $query->where('ahrefs_traffic', '>=', (float)$request->traffic_min);
+//     // }
+//     // if ($request->filled('traffic_max') ) {
+//     //   $query->where('ahrefs_traffic', '<=', (float)$request->traffic_max);
+//     // }
+//     // Ahrefs traffic minimum and maximum
+// if ($request->filled('traffic_min') || $request->filled('traffic_max')) {
+
+//     $trafficMin = $request->filled('traffic_min')
+//         ? (float) $request->traffic_min
+//         : null;
+
+//     $trafficMax = $request->filled('traffic_max')
+//         ? (float) $request->traffic_max
+//         : null;
+
+//     $query->where(function ($sub) use ($trafficMin, $trafficMax) {
+
+//         // Include websites where traffic is not available
+//         $sub->whereNull('ahrefs_traffic');
+
+//         // Apply traffic range to available values
+//         $sub->orWhere(function ($q) use ($trafficMin, $trafficMax) {
+
+//             if ($trafficMin !== null) {
+//                 $q->where('ahrefs_traffic', '>=', $trafficMin);
+//             }
+
+//             if ($trafficMax !== null) {
+//                 $q->where('ahrefs_traffic', '<=', $trafficMax);
+//             }
+//         });
+//     });
+// }
+//     // $perPage = (int)($request->get('per_page', 5));
+//     // $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 10;
+//     $perPage = (int) $request->get('per_page', 5);
+//     $perPage = $perPage > 0 ? min($perPage, 1000) : 5;
+//     $results = $query->paginate($perPage);
+//     return response()->json($results);
+//   }
+
+
+public function searchBlogs(Request $request)
+{
+    $query = BlogMst::query()
+        ->where('is_approved', 'yes');
+
+    // Keyword search
     if ($request->filled('q')) {
-      $q = trim($request->get('q'));
-      $query->where(function ($sub) use ($q) {
-        $sub->where('website_name', 'LIKE', "%{$q}%")
-          ->orWhere('site_url', 'LIKE', "%{$q}%")
-          ->orWhere('website_niche', 'LIKE', "%{$q}%");
-      });
-    }
-    if ($request->filled('niche')) {
-      $raw = $request->get('niche');
-      $niches = is_array($raw) ? $raw : explode(',', (string)$raw);
-      $niches = array_values(array_filter(array_map('trim', $niches), fn($v) => $v !== ''));
-      // If 'all' is present (case-insensitive), skip niche filtering
-      $lower = array_map('strtolower', $niches);
-      $hasAll = in_array('all', $lower, true);
-      if (!$hasAll && !empty($niches)) {
-        $query->where(function ($sub) use ($niches) {
-          foreach ($niches as $n) {
-            $sub->orWhere('website_niche', 'LIKE', "%{$n}%");
-          }
+        $q = trim($request->get('q'));
+
+        $query->where(function ($sub) use ($q) {
+            $sub->where('website_name', 'LIKE', "%{$q}%")
+                ->orWhere('site_url', 'LIKE', "%{$q}%")
+                ->orWhere('website_niche', 'LIKE', "%{$q}%");
         });
-      }
     }
-    if ($request->filled('da_min') ) {
-      $query->where('moz_da', '>=', (float)$request->da_min);
+
+    // Niche filter
+    if ($request->filled('niche')) {
+        $raw = $request->get('niche');
+
+        $niches = is_array($raw)
+            ? $raw
+            : explode(',', (string) $raw);
+
+        $niches = array_values(array_filter(
+            array_map('trim', $niches),
+            fn ($value) => $value !== ''
+        ));
+
+        $hasAll = in_array(
+            'all',
+            array_map('strtolower', $niches),
+            true
+        );
+
+        if (!$hasAll && !empty($niches)) {
+            $query->where(function ($sub) use ($niches) {
+                foreach ($niches as $niche) {
+                    $sub->orWhere(
+                        'website_niche',
+                        'LIKE',
+                        "%{$niche}%"
+                    );
+                }
+            });
+        }
     }
-    if ($request->filled('da_max') ) {
-      $query->where('moz_da', '<=', (float)$request->da_max);
+
+    // Domain Authority filter
+    if ($request->filled('da_min')) {
+        $query->where('moz_da', '>=', (float) $request->da_min);
     }
-    if ($request->filled('dr_min') ) {
-      $query->where('ahrefs_dr', '>=', (float)$request->dr_min);
+
+    if ($request->filled('da_max')) {
+        $query->where('moz_da', '<=', (float) $request->da_max);
     }
-    if ($request->filled('dr_max') ) {
-      $query->where('ahrefs_dr', '<=', (float)$request->dr_max);
+
+    // Domain Rating filter
+    if ($request->filled('dr_min')) {
+        $query->where('ahrefs_dr', '>=', (float) $request->dr_min);
     }
-    $trafficSource = $request->get('traffic_source', 'ahrefs');
-    // $trafficCol = $trafficSource === 'semrush' ? 'semrush_traffic' : 'ahrefs_traffic';
-    if ($request->filled('traffic_min') ) {
-      $query->where('ahrefs_traffic', '>=', (float)$request->traffic_min);
+
+    if ($request->filled('dr_max')) {
+        $query->where('ahrefs_dr', '<=', (float) $request->dr_max);
     }
-    if ($request->filled('traffic_max') ) {
-      $query->where('ahrefs_traffic', '<=', (float)$request->traffic_max);
+
+    // Ahrefs traffic filter
+    // Include NULL traffic values, or apply the selected range
+    if ($request->filled('traffic_min') || $request->filled('traffic_max')) {
+
+        $trafficMin = $request->filled('traffic_min')
+            ? (float) $request->traffic_min
+            : null;
+
+        $trafficMax = $request->filled('traffic_max')
+            ? (float) $request->traffic_max
+            : null;
+
+        $query->where(function ($sub) use ($trafficMin, $trafficMax) {
+
+            $sub->whereNull('ahrefs_traffic')
+                ->orWhere(function ($trafficQuery) use ($trafficMin, $trafficMax) {
+
+                    if ($trafficMin !== null) {
+                        $trafficQuery->where(
+                            'ahrefs_traffic',
+                            '>=',
+                            $trafficMin
+                        );
+                    }
+
+                    if ($trafficMax !== null) {
+                        $trafficQuery->where(
+                            'ahrefs_traffic',
+                            '<=',
+                            $trafficMax
+                        );
+                    }
+                });
+        });
     }
-    // $perPage = (int)($request->get('per_page', 5));
-    // $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 10;
+
+    // Pagination
     $perPage = (int) $request->get('per_page', 5);
     $perPage = $perPage > 0 ? min($perPage, 1000) : 5;
-    $results = $query->paginate($perPage);
-    return response()->json($results);
-  }
 
+    $results = $query->paginate($perPage);
+
+    return response()->json($results);
+}
 
   // public function addBlog(Request $request)
   // {
