@@ -98,25 +98,25 @@ public function blogList(Request $request)
         });
       }
     }
-    if ($request->filled('da_min') && ($request->get('da_min'))) {
-      $query->where('moz_da', '>=', (float)$request->get('da_min'));
+    if ($request->filled('da_min') && $request->da_min) {
+      $query->where('moz_da', '>=', (float)$request->da_min);
     }
-    if ($request->filled('da_max') && ($request->get('da_max'))) {
-      $query->where('moz_da', '<=', (float)$request->get('da_max'));
+    if ($request->filled('da_max') && ($request->da_max)) {
+      $query->where('moz_da', '<=', (float)$request->da_max);
     }
-    if ($request->filled('dr_min') && ($request->get('dr_min'))) {
-      $query->where('ahrefs_dr', '>=', (float)$request->get('dr_min'));
+    if ($request->filled('dr_min') && ($request->dr_min)) {
+      $query->where('ahrefs_dr', '>=', (float)$request->dr_min);
     }
-    if ($request->filled('dr_max') && ($request->get('dr_max'))) {
-      $query->where('ahrefs_dr', '<=', (float)$request->get('dr_max'));
+    if ($request->filled('dr_max') && ($request->dr_max)) {
+      $query->where('ahrefs_dr', '<=', (float)$request->dr_max);
     }
     $trafficSource = $request->get('traffic_source', 'ahrefs');
     $trafficCol = $trafficSource === 'semrush' ? 'semrush_traffic' : 'ahrefs_traffic';
-    if ($request->filled('traffic_min') && ($request->get('traffic_min'))) {
-      $query->where($trafficCol, '>=', (float)$request->get('traffic_min'));
+    if ($request->filled('traffic_min') && ($request->traffic_min)) {
+      $query->where($trafficCol, '>=', (float)$request->traffic_min);
     }
-    if ($request->filled('traffic_max') && ($request->get('traffic_max'))) {
-      $query->where($trafficCol, '<=', (float)$request->get('traffic_max'));
+    if ($request->filled('traffic_max') && ($request->traffic_max)) {
+      $query->where($trafficCol, '<=', (float)$request->traffic_max);
     }
     $perPage = (int)($request->get('per_page', 10));
     $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 10;
