@@ -54,16 +54,15 @@ public function blogList(Request $request)
     if ($request->filled('traffic_max')) {
         $query->where('ahrefs_traffic', '<=', $request->traffic_max);
     }
-    return response()->json([
-      'website_niche'=> $request->website_niche ?? '',
+    
+    return response()->json([$query->paginate(10),
+     'website_niche'=> $request->website_niche ?? '',
       'da_min'=> $request->da_min ?? '',
       'da_max'=> $request->da_max ?? '',
       'dr_min'=> $request->dr_min ?? '',
       'dr_max'=> $request->dr_max ?? '',
       'traffic_min'=> $request->traffic_min ?? '',
-      'traffic_max'=> $request->traffic_max ?? '',
-    ]);
-    return response()->json($query->paginate(10));
+      'traffic_max'=> $request->traffic_max ?? '',]);
 }
 
   public function getBlogById($id)
