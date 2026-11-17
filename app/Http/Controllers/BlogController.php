@@ -113,10 +113,10 @@ public function blogList(Request $request)
     $trafficSource = $request->get('traffic_source', 'ahrefs');
     $trafficCol = $trafficSource === 'semrush' ? 'semrush_traffic' : 'ahrefs_traffic';
     if ($request->filled('traffic_min') && ($request->traffic_min)) {
-      $query->where($trafficCol, '>=', (float)$request->traffic_min);
+      $query->where('ahrefs_traffic', '>=', (float)$request->traffic_min);
     }
     if ($request->filled('traffic_max') && ($request->traffic_max)) {
-      $query->where($trafficCol, '<=', (float)$request->traffic_max);
+      $query->where('ahrefs_traffic', '<=', (float)$request->traffic_max);
     }
     $perPage = (int)($request->get('per_page', 10));
     $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 10;
