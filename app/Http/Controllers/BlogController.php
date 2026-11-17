@@ -118,8 +118,10 @@ public function blogList(Request $request)
     if ($request->filled('traffic_max') ) {
       $query->where('ahrefs_traffic', '<=', (float)$request->traffic_max);
     }
-    $perPage = (int)($request->get('per_page', 10));
-    $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 10;
+    // $perPage = (int)($request->get('per_page', 5));
+    // $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 10;
+    $perPage = (int) $request->get('per_page', 5);
+    $perPage = $perPage > 0 ? min($perPage, 1000) : 5;
     $results = $query->paginate($perPage);
     return response()->json($results);
   }
