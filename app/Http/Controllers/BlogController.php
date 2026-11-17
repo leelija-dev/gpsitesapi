@@ -98,16 +98,16 @@ public function blogList(Request $request)
         });
       }
     }
-    if ($request->filled('da_min') && is_numeric($request->get('da_min'))) {
+    if ($request->filled('da_min') && ($request->get('da_min'))) {
       $query->where('moz_da', '>=', (float)$request->get('da_min'));
     }
-    if ($request->filled('da_max') && is_numeric($request->get('da_max'))) {
+    if ($request->filled('da_max') && ($request->get('da_max'))) {
       $query->where('moz_da', '<=', (float)$request->get('da_max'));
     }
-    if ($request->filled('dr_min') && is_numeric($request->get('dr_min'))) {
+    if ($request->filled('dr_min') && ($request->get('dr_min'))) {
       $query->where('ahrefs_dr', '>=', (float)$request->get('dr_min'));
     }
-    if ($request->filled('dr_max') && is_numeric($request->get('dr_max'))) {
+    if ($request->filled('dr_max') && ($request->get('dr_max'))) {
       $query->where('ahrefs_dr', '<=', (float)$request->get('dr_max'));
     }
     $trafficSource = $request->get('traffic_source', 'ahrefs');
